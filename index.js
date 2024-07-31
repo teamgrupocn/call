@@ -6,7 +6,7 @@ const PORT = process.env.PORT || 8080;
 app.post('/twiml', (req, res) => {
     const twimlResponse = `
         <Response>
-            <Say voice="alice" language="pt-BR">Olá, esta é uma mensagem personalizada, agora ALicy e hora de fazer muita grana.</Say>
+            <Say voice="alice" language="pt-BR">Anthony aqui e o Javis seu vendedor com IA.</Say>
         </Response>
     `;
     res.set('Content-Type', 'text/xml');
