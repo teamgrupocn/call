@@ -4,6 +4,7 @@ const axios = require('axios');
 const app = express();
 
 app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json());
 
 const PORT = process.env.PORT || 8080;
 
@@ -26,20 +27,48 @@ app.post('/process-name', async (req, res) => {
     const speechResult = req.body.SpeechResult;
     console.log('Nome do usuário:', speechResult);
 
-    // Enviar o nome do usuário ao Dify para gerar a mensagem de boas-vindas
-    const difyResponse = await axios.post('https://api.dify.com/process', { input: speechResult });
-    const difyReply = difyResponse.data.reply;
+    if (!speechResult) {
+        const twimlResponse = `
+            <Response>
+                <Say voice="alice" language="pt-BR">Desculpe, não consegui capturar o seu nome. Por favor, tente novamente.</Say>
+                <Redirect>/twiml</Redirect>
+            </Response>
+        `;
+        res.set('Content-Type', 'text/xml');
+        return res.send(twimlResponse);
+    }
 
-    // Responder ao usuário com a mensagem de boas-vindas
-    const twimlResponse = `
-        <Response>
-            <Say voice="alice" language="pt-BR">${difyReply}</Say>
-            <Pause length="2" />
-            <Hangup />
-        </Response>
-    `;
-    res.set('Content-Type', 'text/xml');
-    res.send(twimlResponse);
+    // Enviar o nome do usuário ao Dify para gerar a mensagem de boas-vindas
+    try {
+        const difyResponse = await axios.post('https://seu-endpoint-dify.com/process', { input: speechResult }, {
+            auth: {
+                username: 'YOUR_DIFY_USERNAME',  // substitua pelo seu nome de usuário Dify
+                password: 'YOUR_DIFY_PASSWORD'  // substitua pela sua senha Dify
+            }
+        });
+        const difyReply = difyResponse.data.reply;
+
+        // Responder ao usuário com a mensagem de boas-vindas
+        const twimlResponse = `
+            <Response>
+                <Say voice="alice" language="pt-BR">${difyReply}</Say>
+                <Pause length="2" />
+                <Hangup />
+            </Response>
+        `;
+        res.set('Content-Type', 'text/xml');
+        res.send(twimlResponse);
+    } catch (error) {
+        console.error('Erro ao processar o nome:', error);
+        const twimlResponse = `
+            <Response>
+                <Say voice="alice" language="pt-BR">Ocorreu um erro ao processar sua solicitação. Por favor, tente novamente mais tarde.</Say>
+                <Hangup />
+            </Response>
+        `;
+        res.set('Content-Type', 'text/xml');
+        res.send(twimlResponse);
+    }
 });
 
 app.listen(PORT, () => {
