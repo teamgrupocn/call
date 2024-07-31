@@ -1,6 +1,5 @@
 const express = require('express');
 const bodyParser = require('body-parser');
-const axios = require('axios');
 const app = express();
 
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -40,10 +39,10 @@ app.post('/process-name', async (req, res) => {
 
     // Enviar o nome do usuário ao Dify para gerar a mensagem de boas-vindas
     try {
-        const difyResponse = await axios.post('https://seu-endpoint-dify.com/process', { input: speechResult }, {
+        const difyResponse = await axios.post('https://web-production-64d2.up.railway.app/process', { input: speechResult }, {
             auth: {
-                username: 'YOUR_DIFY_USERNAME',  // substitua pelo seu nome de usuário Dify
-                password: 'YOUR_DIFY_PASSWORD'  // substitua pela sua senha Dify
+                username: 'ferramentas@anthonymiranda.com.br',  // substitua pelo seu nome de usuário Dify
+                password: 'SQChBn7SQNVHn9s'  // substitua pela sua senha Dify
             }
         });
         const difyReply = difyResponse.data.reply;
@@ -69,6 +68,14 @@ app.post('/process-name', async (req, res) => {
         res.set('Content-Type', 'text/xml');
         res.send(twimlResponse);
     }
+});
+
+// Endpoint para gerar a mensagem de boas-vindas
+app.post('/process', (req, res) => {
+    const { input } = req.body;
+    const reply = `Olá ${input}, seja bem-vindo(a)!`;
+
+    res.json({ reply });
 });
 
 app.listen(PORT, () => {
